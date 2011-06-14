@@ -8,6 +8,7 @@ server will be in front of these shards).
 ###Current status###
 
 This is just meant as a PoC; as such, there is much to do:
+
  - bNodes
  - URI support
  - efficient serialization of data to disk
