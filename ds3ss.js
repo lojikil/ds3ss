@@ -1,4 +1,5 @@
-var connect = require('connect');
+var connect = require('connect'),
+    util    = require('util');
 /* for now, the quick & dirty method
  *  - startup server
  *  - let the shard library handle everything else
@@ -62,4 +63,4 @@ var triplestore = {},
            }
     });
 });
-connect().use('/',shard).listen(3157);
+connect(connect.bodyParser()).use('/',shard).listen(3157);
