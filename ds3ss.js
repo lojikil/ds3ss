@@ -24,7 +24,7 @@ var triplestore = {},
     });
     app.get('/:section',function(req,res) {
             if(req.params.section in triplestore){
-                res.end({'subject' : Object.keys(triplestore[req.params.section])});
+                res.end(JSON.stringify({'subject' : Object.keys(triplestore[req.params.section])}));
             } else {
                 res.end(JSON.stringify({'error': 'no such subject','code':'0'}));
             }
@@ -32,7 +32,7 @@ var triplestore = {},
     app.get('/:section/:predicate',function(req,res) {
             if(req.params.section   in triplestore &&
                req.params.predicate in triplestore[req.params.section]) {
-                res.end({'predicate' : triplestore[req.params.section][req.params.predicate]});
+                res.end(JSON.stringify({'predicate' : triplestore[req.params.section][req.params.predicate]}));
             } else {
                 res.end(JSON.stringify({'error': 'no such subject and/or predicate','code':'1'}));
             }
@@ -48,7 +48,7 @@ var triplestore = {},
     });
     app.post('/:section',function(req,res){
              triplestore[req.params.section] = {};
-             res.end("Done");
+             res.end(JSON.stringify({'status':"done"}));
     });
     app.post('/:section/:predicate',function(req,res) {
            if(req.params.section in triplestore) {
