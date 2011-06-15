@@ -7,6 +7,30 @@ var connect = require('connect'),
  *  Probably want to have logging, auth, &c &c &c here,
  *  but as a PoC, this is fine
  */
+function collateBody()
+{
+    function bodyCollation(req,res,next)
+    {
+        if(!req.body)
+        {
+            var data = '';
+            req.on('data',function(chunk) { data += chunk; });
+            req.on('end',function bcOn()
+            {
+                if(data != '')
+                {
+                    req.body = data;
+                }
+            });
+            next();
+        }
+        else
+        {
+            next();
+        }
+    }
+    return bodyCollation;
+}
 var triplestore = {},
     predicates  = {},
     shard       = connect.router(function(app) {
@@ -63,4 +87,4 @@ var triplestore = {},
            }
     });
 });
-connect(connect.bodyParser()).use('/',shard).listen(3157);
+connect(collateBody()).use('/',shard).listen(3157);
