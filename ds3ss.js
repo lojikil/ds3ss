@@ -7,9 +7,20 @@ var connect = require('connect');
  *  but as a PoC, this is fine
  */
 var triplestore = {},
-    shard = connect.router(function(app) {
+    predicates  = {},
+    shard       = connect.router(function(app) {
     app.get('/',function(req,res) {
-            res.end(JSON.stringify({'subjects': Object.keys(triplestore)}));
+            if('predicate' in req.params)
+            {
+                if(req.params.predicate in predicates)
+                {
+                    res.end(JSON.stringify({'subjects':predicates[req.params.predicate]}));
+                } else {
+                    res.end(JSON.stringify({'subjects':[]}));
+                }
+            } else {
+                res.end(JSON.stringify({'subjects': Object.keys(triplestore)}));
+            }
     });
     app.get('/:section',function(req,res) {
             if(req.params.section in triplestore){
@@ -32,7 +43,7 @@ var triplestore = {},
                 triplestore[req.params.section][req.params.predicate] = req.body;
                 res.end(JSON.stringify({'status':'done'}));
             } else {
-                res.end(JSON.stringify({'error': 'no such subject and/or predicate','code':'2'}));
+                res.end(JSON.stringify({'error': 'no suhc subject and/or predicate','code':'2'}));
             }
     });
     app.post('/:section',function(req,res){
@@ -42,9 +53,12 @@ var triplestore = {},
     app.post('/:section/:predicate',function(req,res) {
            if(req.params.section in triplestore) {
                 triplestore[req.params.section][req.params.predicate] = req.body;
+                predicates[req.params.predicate] = req.params.section;
                 res.end(JSON.stringify({'status':'done'}));
            } else {
-                res.end(JSON.stringify({'error': 'no such subject','code':'3'}));
+                triplestore[req.params.section] = {};
+                triplestore[req.params.section][req.params.predicate] = req.body;
+                res.end(JSON.stringify({'status':'done'}));
            }
     });
 });
