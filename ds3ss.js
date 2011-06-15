@@ -6,28 +6,46 @@ var connect = require('connect');
  *  Probably want to have logging, auth, &c &c &c here,
  *  but as a PoC, this is fine
  */
-
-var shard = connect.router(function(app) {
+var triplestore = {},
+    shard = connect.router(function(app) {
     app.get('/',function(req,res) {
-            res.end({'subjects': Object.keys(triplestore)});
-            });
+            res.end(JSON.stringify({'subjects': Object.keys(triplestore)}));
+    });
     app.get('/:section',function(req,res) {
-            res.end({req.params.section : Object.keys(triplestore[req.params.section])});
-            });
+            if(req.params.section in triplestore){
+                res.end({'subject' : Object.keys(triplestore[req.params.section])});
+            } else {
+                res.end(JSON.stringify({'error': 'no such subject','code':'0'}));
+            }
+    });
     app.get('/:section/:predicate',function(req,res) {
-            res.end({req.params.predicate : triplestore[req.params.section][req.params.predicate]});
-            });
+            if(req.params.section   in triplestore &&
+               req.params.predicate in triplestore[req.params.section]) {
+                res.end({'predicate' : triplestore[req.params.section][req.params.predicate]});
+            } else {
+                res.end(JSON.stringify({'error': 'no such subject and/or predicate','code':'1'}));
+            }
+    });
     app.put('/:section/:predicate',function(req,res) {
-           triplestore[req.params.section][req.params.predicate] = req.body;
-           res.end("Done");
-           });
+            if(req.params.section   in triplestore &&
+               req.params.predicate in triplestore[req.params.section]) {
+                triplestore[req.params.section][req.params.predicate] = req.body;
+                res.end(JSON.stringify({'status':'done'}));
+            } else {
+                res.end(JSON.stringify({'error': 'no such subject and/or predicate','code':'2'}));
+            }
+    });
     app.post('/:section',function(req,res){
              triplestore[req.params.section] = {};
              res.end("Done");
-           });
+    });
     app.post('/:section/:predicate',function(req,res) {
-           triplestor[req.params.section][req.params.predicate] = req.body;
-           res.end("Done");
-           });
+           if(req.params.section in triplestore) {
+                triplestore[req.params.section][req.params.predicate] = req.body;
+                res.end(JSON.stringify({'status':'done'}));
+           } else {
+                res.end(JSON.stringify({'error': 'no such subject','code':'3'}));
+           }
+    });
 });
 connect().use('/',shard).listen(3157);
