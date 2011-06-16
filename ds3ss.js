@@ -21,8 +21,8 @@ function collateBody()
                 {
                     req.body = data;
                 }
+                next();
             });
-            next();
         }
         else
         {
